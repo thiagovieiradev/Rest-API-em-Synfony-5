@@ -1,0 +1,99 @@
+<?php
+
+namespace App\Repository;
+
+use App\Entity\Senioridade;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Doctrine\Persistence\ManagerRegistry;
+
+/**
+ * @method Senioridade|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Senioridade|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Senioridade[]    findAll()
+ * @method Senioridade[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ */
+class SenioridadeRepository extends ServiceEntityRepository
+{
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, Senioridade::class);
+    }
+
+    /**
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function add(Senioridade $entity, bool $flush = true): void
+    {
+        $this->_em->persist($entity);
+        if ($flush) {
+            $this->_em->flush();
+        }
+    }
+
+    /**
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function remove(Senioridade $entity, bool $flush = true): void
+    {
+        $this->_em->remove($entity);
+        if ($flush) {
+            $this->_em->flush();
+        }
+    }
+
+    public function buscarSenioridade($id): ?Senioridade
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.deleted_at is null')
+            ->andWhere('c.id = :id')            
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
+
+    /**
+     * @return Senioridade[] Returns an array of Senioridade objects
+     */
+    public function buscarSenioridades()
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.deleted_at is NULL')            
+            ->getQuery()            
+            ->getResult()
+        ;
+    }
+
+    // /**
+    //  * @return Senioridade[] Returns an array of Senioridade objects
+    //  */
+    /*
+    public function findByExampleField($value)
+    {
+        return $this->createQueryBuilder('s')
+            ->andWhere('s.exampleField = :val')
+            ->setParameter('val', $value)
+            ->orderBy('s.id', 'ASC')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+    */
+
+    /*
+    public function findOneBySomeField($value): ?Senioridade
+    {
+        return $this->createQueryBuilder('s')
+            ->andWhere('s.exampleField = :val')
+            ->setParameter('val', $value)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
+    */
+}
