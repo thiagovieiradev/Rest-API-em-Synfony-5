@@ -25,11 +25,19 @@ class CategoriaService
     }
 
     public function salvar($dados): Categoria
-    {                
-        $this->categoria->setNome($dados->nome);            
-        $this->getManager->persist($this->categoria);
-        $this->getManager->flush();
-        return $this->categoria;
+    {   
+        
+        try {
+            $this->getManager->beginTransaction();
+            $this->categoria->setNome($dados->nome);            
+            $this->getManager->persist($this->categoria);
+            $this->getManager->flush();
+            $this->getManager->commit();
+            return $this->categoria;
+        } catch (\Exception $e) {
+            $this->getManager->rollback();
+            return $e->getMessage();
+        }
     }
 
     public function atualizar($dados): Categoria

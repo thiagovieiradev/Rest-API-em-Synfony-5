@@ -5,7 +5,7 @@
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '700fcaca710bac0201ae7f8cbf3c9c63993b9a67',
+        'reference' => '56c08d734a819090c2b7eee1a13ec6ddba7b02d2',
         'name' => '__root__',
         'dev' => true,
     ),
@@ -16,7 +16,7 @@
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '700fcaca710bac0201ae7f8cbf3c9c63993b9a67',
+            'reference' => '56c08d734a819090c2b7eee1a13ec6ddba7b02d2',
             'dev_requirement' => false,
         ),
         'doctrine/annotations' => array(
@@ -225,6 +225,15 @@
             'aliases' => array(),
             'reference' => '14daed4296fae74d9e3201d2c4925d1acb7aa614',
             'dev_requirement' => true,
+        ),
+        'nelmio/cors-bundle' => array(
+            'pretty_version' => '2.2.0',
+            'version' => '2.2.0.0',
+            'type' => 'symfony-bundle',
+            'install_path' => __DIR__ . '/../nelmio/cors-bundle',
+            'aliases' => array(),
+            'reference' => '0ee5ee30b0ee08ea122d431ae6e0ddeb87f035c0',
+            'dev_requirement' => false,
         ),
         'nikic/php-parser' => array(
             'pretty_version' => 'v4.13.2',

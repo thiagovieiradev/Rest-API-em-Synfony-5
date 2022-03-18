@@ -59,25 +59,10 @@ class TurmaService
         $this->turma->setStatus($status);
 
         $disciplinas_id = $dados->disciplinas;
-        if(count($disciplinas_id) == 0)
-            throw new Exception("Selecione ao menos uma disciplina", 1);
-        foreach($disciplinas_id as $iddisciplina){
-            $disciplina = $this->disciplinaRepository->buscarDisciplina($iddisciplina); 
-            if(!$disciplina)
-                throw new Exception("Disciplina selecionada não existe!", 1);
-            $this->turma->addDisciplina($disciplina);    
-        }
-        
+        $this->validarAtributo($disciplinas_id, "disciplina", $this->disciplinaRepository, $this->turma);        
         $colaboradores_id = $dados->colaboradores;
-        if(count($colaboradores_id) == 0)
-            throw new Exception("Selecione ao menos um colaborador", 1);
-        foreach($colaboradores_id as $idcolaborador){
-            $colaborador = $this->colaboradorRepository->buscarColaborador($idcolaborador); 
-            if(!$colaborador)
-                throw new Exception("Colaborador selecionado não existe!", 1);
-            $this->turma->addColaborador($colaborador);    
-        }        
-
+        $this->validarAtributo($colaboradores_id, "colaborador", $this->colaboradorRepository, $this->turma);
+        
         $this->getManager->persist($this->turma);
         $this->getManager->flush();
         return $this->turma;
@@ -109,28 +94,14 @@ class TurmaService
             $turma->removeDisciplina($disciplina);
         }                
         $disciplinas_id = $dados->disciplinas;
-        if(count($disciplinas_id) == 0)
-            throw new Exception("Selecione ao menos uma disciplina", 1);
-        foreach($disciplinas_id as $d){
-            $disciplina = $this->disciplinaRepository->buscarDisciplina($d); 
-            if(!$disciplina)
-                throw new Exception("Disciplina selecionada não existe!", 1);
-            $turma->addDisciplina($disciplina);    
-        }
+        $this->validarAtributo($disciplinas_id, "disciplina", $this->disciplinaRepository, $this->turma);               
         
         foreach ($turma->getColaborador() as $colaborador) {
             $turma->removeColaborador($colaborador);
-        } 
-        $colaboradores_id = $dados->colaboradores;
-        if(count($colaboradores_id) == 0)
-            throw new Exception("Selecione ao menos um colaborador", 1);
-        foreach($colaboradores_id as $c){
-            $colaborador = $this->colaboradorRepository->buscarColaborador($c); 
-            if(!$colaborador)
-                throw new Exception("Colaborador selecionado não existe!", 1);
-            $turma->addColaborador($colaborador);    
         }
-
+        $colaboradores_id = $dados->colaboradores;
+        $this->validarAtributo($disciplinas_id, "disciplina", $this->disciplinaRepository, $this->turma);  
+        
         $this->getManager->flush();
         return $turma;
     }
@@ -144,6 +115,24 @@ class TurmaService
         $turma->setDeletedAt(new \DateTime());
         $this->getManager->flush(); 
         return $turma;
+    }
+
+    public function validarAtributo($atributo, $nomeCampo, $repository, $contexto){        
+        if(count($atributo) == 0)
+            throw new Exception("Selecione ao menos um ".$nomeCampo, 1);
+        foreach($atributo as $item){
+            if(strcmp($nomeCampo, "colaborador") == 0)
+                $elemento = $repository->buscarColaborador($item); 
+            elseif(strcmp($nomeCampo, "disciplina") == 0)                
+                $elemento = $repository->buscarDisciplina($item); 
+            if(!$elemento)
+                throw new Exception("Selecione ao menos um ".$nomeCampo, 1);
+            if(strcmp($nomeCampo, "colaborador") == 0)
+                $contexto->addColaborador($elemento);    
+            elseif(strcmp($nomeCampo, "disciplina") == 0)                
+                $contexto->addDisciplina($elemento);    
+        }        
+
     }
 
 }

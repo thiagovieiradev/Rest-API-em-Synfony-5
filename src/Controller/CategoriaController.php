@@ -49,7 +49,8 @@ class CategoriaController extends AbstractController
             $json = $this->serializer->serialize($categorias, 'json',
                 ['groups' => ['mostrar_categorias']]
             );
-            return $this->json(json_decode($json), 200);        
+            return $this->json(['result' => json_decode($json)], 200);
+                    
         } catch (\Exception $e) {
             return $this->json($e->getMessage(), 200); 
         }
@@ -68,7 +69,7 @@ class CategoriaController extends AbstractController
             $json = $this->serializer->serialize($categoria, 'json',
                 ['groups' => ['mostrar_categorias']]
             );
-            return $this->json(json_decode($json), 200);                
+            return $this->json(['result' => json_decode($json)], 200);                
         } catch (\Exception $e) {
             return $this->json($e->getMessage(), 200); 
         }

@@ -47,10 +47,10 @@ class CompetenciaRepository extends ServiceEntityRepository
 
     public function buscarCompetencia($id): ?Competencia
     {
-        return $this->createQueryBuilder('c')
+        return $this->createQueryBuilder('c')            
             ->andWhere('c.deleted_at is null')
             ->andWhere('c.id = :id')            
-            ->setParameter('id', $id)
+            ->setParameter('id', $id)            
             ->getQuery()
             ->getOneOrNullResult()
         ;
@@ -62,7 +62,9 @@ class CompetenciaRepository extends ServiceEntityRepository
     public function buscarCompetencias()
     {
         return $this->createQueryBuilder('c')
+            ->select('c.nome AS cnome, c.descricao, d.nome AS categoria_nome')
             ->andWhere('c.deleted_at is null')            
+            ->join('c.categoria', 'd')
             ->getQuery()            
             ->getResult()
         ;
