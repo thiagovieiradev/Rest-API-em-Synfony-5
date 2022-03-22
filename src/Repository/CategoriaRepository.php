@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Repository\AbstractRepository;
 use App\Entity\Categoria;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\OptimisticLockException;
@@ -14,7 +15,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Categoria[]    findAll()
  * @method Categoria[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class CategoriaRepository extends ServiceEntityRepository
+class CategoriaRepository extends ServiceEntityRepository 
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -59,13 +60,16 @@ class CategoriaRepository extends ServiceEntityRepository
     /**
      * @return Categoria[] Returns an array of Categoria objects
      */
-    public function buscarCategorias()
+    public function buscarCategorias($buscar)
     {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.deleted_at is NULL')            
-            ->getQuery()            
-            ->getResult()
-        ;
+        $categorias = $this->createQueryBuilder('c')
+            ->andWhere('c.deleted_at is NULL');
+        if($buscar)
+            $categorias = $categorias->setMaxResults(10);
+
+        $categorias = $categorias->getQuery()->getResult();
+
+        return $categorias;
     }
 
     // /**

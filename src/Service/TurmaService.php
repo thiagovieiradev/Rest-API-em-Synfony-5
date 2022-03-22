@@ -49,7 +49,7 @@ class TurmaService
         $data_inicio = $this->helper->parseData($dados->data_inicio);        
         $this->turma->setDataInicio($data_inicio);
 
-        $data_termino = $this->helper->parseData($dados->data_termino);        
+        $data_termino = Helper::parseData($dados->data_termino);        
         $this->turma->setDataTermino($data_termino);
     
         $status_id = $dados->status;

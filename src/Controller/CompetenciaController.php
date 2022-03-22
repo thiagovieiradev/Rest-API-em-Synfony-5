@@ -8,6 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\CategoriaRepository;
 use App\Repository\CompetenciaRepository;
 use App\Entity\Competencia;
+use App\Helper\Helper;
 use App\Entity\Categoria;
 use App\Service\CompetenciaService;
 use Doctrine\Persistence\ManagerRegistry;
@@ -30,7 +31,7 @@ class CompetenciaController extends AbstractController
 
     private $competenciaService;
     
-    public function __construct(CompetenciaService $competenciaService, SerializerInterface $serializer, CompetenciaRepository $competenciaRepository, CategoriaRepository $categoriaRepository, ManagerRegistry $doctrine)
+    public function __construct(Helper $helper, CompetenciaService $competenciaService, SerializerInterface $serializer, CompetenciaRepository $competenciaRepository, CategoriaRepository $categoriaRepository, ManagerRegistry $doctrine)
     {
         $this->competenciaRepository = $competenciaRepository;
         $this->categoriaRepository = $categoriaRepository;
@@ -38,21 +39,31 @@ class CompetenciaController extends AbstractController
         $this->doctrine = $doctrine;
         $this->serializer = $serializer;
         $this->competenciaService = $competenciaService;
+        $this->helper = $helper;
     }
 
     /**
      * @Route("/competencias", name="listar-competencias",  methods={"GET"})
      */
-    public function listar(): Response
+    public function listar(Request $request): Response
     {       
         try {
-            $competencias = $this->competenciaRepository->buscarCompetencias();
+            $buscar = $request->query->get('buscar'); 
+            $competencias = $this->helper->resolverBuscar($buscar, $this->competenciaRepository);
+            //$competencias = $this->competenciaRepository->buscarCompetencias();
             if(!$competencias)
                 return $this->json("Nenhuma competência encontrada!", 200);        
+            
             $json = $this->serializer->serialize($competencias, 'json',
                 ['groups' => ['mostrar_competencia', 'mostrar_categorias']]
             );
-            return $this->json(json_decode($json), 200);                      
+            $resposta = json_decode($json);
+
+            $totalRows = count($this->helper->resolverBuscar($buscar, $this->competenciaRepository, true));
+            return $this->json(
+                ['competencias' => $resposta, 'totalRecords' => $totalRows], 200
+            );
+            
         } catch (\Exception $e) {
             return $this->json($e->getMessage(), 200);                  
         }         

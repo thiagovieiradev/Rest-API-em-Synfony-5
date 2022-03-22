@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\CategoriaRepository;
 use App\Entity\Categoria;
+use App\Helper\Helper;
 use App\Service\CategoriaService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,7 +28,9 @@ class CategoriaController extends AbstractController
 
     private $categoria;
 
-    public function __construct(CategoriaService $categoriaService, SerializerInterface $serializer, CategoriaRepository $categoriaRepository, ManagerRegistry $doctrine
+    private $helper;
+
+    public function __construct(Helper $helper, CategoriaService $categoriaService, SerializerInterface $serializer, CategoriaRepository $categoriaRepository, ManagerRegistry $doctrine
     ) {
         $this->categoriaRepository = $categoriaRepository;
         $this->entity = $doctrine->getManager();
@@ -35,21 +38,31 @@ class CategoriaController extends AbstractController
         $this->serializer = $serializer;
         $this->categoria = new Categoria();
         $this->categoriaService = $categoriaService;
+        $this->helper = $helper;
     }
 
     /**
      * @Route("/categorias", name="listar-categorias",  methods={"GET"})
      */
-    public function listar(): Response
+    public function listar(Request $request): Response
     {      
         try {
-            $categorias = $this->categoriaRepository->buscarCategorias();
+            
+            $buscar = $request->query->get('buscar');            
+            $categorias = $this->helper->resolverBuscar($buscar, $this->categoriaRepository);            
+            //$categorias = $this->categoriaRepository->buscarCategorias($buscar);            
             if(!$categorias)
                 return $this->json("Nenhuma categoria encontrada!", 200);        
+
             $json = $this->serializer->serialize($categorias, 'json',
                 ['groups' => ['mostrar_categorias']]
-            );
-            return $this->json(['data' => json_decode($json)], 200);
+            );            
+            $resposta = json_decode($json);
+            
+            $totalRows = count($this->helper->resolverBuscar($buscar, $this->categoriaRepository, true));
+            return $this->json(
+                ['categorias' => $resposta, 'totalRecords' => $totalRows], 200
+            );            
                     
         } catch (\Exception $e) {
             return $this->json($e->getMessage(), 200); 
@@ -119,9 +132,9 @@ class CategoriaController extends AbstractController
     {
         try {            
             $categoria = $this->categoriaService->excluir($id);                  
-            return $this->json($categoria, 200);  
+            return $this->json(['codigo' => Response::HTTP_OK, 'message' => $categoria->getId()], 200);  
         } catch (\Exception $e) {
-            return $this->json($e->getMessage(), 200); 
+            return $this->json(['codigo' => Response::HTTP_NOT_FOUND, 'message' => $e->getMessage()], 200); 
         }
         
     }
