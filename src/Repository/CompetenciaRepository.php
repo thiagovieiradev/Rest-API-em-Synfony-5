@@ -73,6 +73,20 @@ class CompetenciaRepository extends ServiceEntityRepository
     /**
      * @return Competencia[] Returns an array of Competencias objects
      */
+    public function buscarCompetenciasPorCategoria($id)
+    {
+        return $this->createQueryBuilder('c')
+            ->select('c.id, c.nome AS cnome, c.descricao')
+            ->andWhere('c.deleted_at is null')            
+            ->andWhere('c.categoria = '.$id)                        
+            ->getQuery()            
+            ->getResult()
+        ;
+    }
+
+    /**
+     * @return Competencia[] Returns an array of Competencias objects
+     */
     public function buscarCompetenciasArray(Array $id)
     {
         return $this->createQueryBuilder('c')

@@ -8,6 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\SenioridadeRepository;
 use App\Entity\Senioridade;
 use App\Service\SenioridadeService;
+use App\Helper\Helper;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -26,7 +27,9 @@ class SenioridadeController extends AbstractController
 
     private $senioridade;
 
-    public function __construct(SenioridadeService $senioridadeService, SerializerInterface $serializer, SenioridadeRepository $senioridadeRepository, ManagerRegistry $doctrine
+    private $helper;
+
+    public function __construct(Helper $helper, SenioridadeService $senioridadeService, SerializerInterface $serializer, SenioridadeRepository $senioridadeRepository, ManagerRegistry $doctrine
     ) {
         $this->senioridadeRepository = $senioridadeRepository;
         $this->entity = $doctrine->getManager();
@@ -34,24 +37,29 @@ class SenioridadeController extends AbstractController
         $this->serializer = $serializer;
         $this->senioridade = new Senioridade();
         $this->senioridadeService = $senioridadeService;
+        $this->helper = $helper;
     }
 
     /**
      * @Route("/senioridades", name="senioridades",  methods={"GET"})
      */
-    public function listar(): Response
+    public function listar(Request $request): Response
     {      
-        try {
-            $senioridades = $this->senioridadeRepository->buscarSenioridades();
-            if(!$senioridades)
-                return $this->json("Nenhuma senioridade encontrada!", 200);   
-            $json = $this->serializer->serialize($senioridades, 'json',
-                ['groups' => ['mostrar_senioridades']]
-            );
-            return $this->json(json_decode($json), 200);        
-        } catch (\Exception $e) {
-            return $this->json($e->getMessage(), 200); 
-        }
+
+        $buscar = $request->query->get('buscar'); 
+        $senioridades = $this->helper->resolverBuscar($buscar, $this->senioridadeRepository);        
+        if(!$senioridades)
+            return $this->json("Nenhuma senioridade encontrada!", 200);        
+        
+        $json = $this->serializer->serialize($senioridades, 'json',
+            ['groups' => ['mostrar_senioridades']]
+        );
+        $resposta = json_decode($json);
+
+        $totalRows = count($this->helper->resolverBuscar($buscar, $this->senioridadeRepository, true));
+        return $this->json(
+            ['senioridades' => $resposta, 'totalRecords' => $totalRows], 200
+        );
     }
 
     /**

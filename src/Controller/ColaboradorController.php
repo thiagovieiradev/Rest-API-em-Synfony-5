@@ -10,6 +10,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use App\Service\ColaboradorService;
 use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Colaborador;
+use App\Helper\Helper;
 use Doctrine\Persistence\ManagerRegistry;
 
 class ColaboradorController extends AbstractController
@@ -17,31 +18,38 @@ class ColaboradorController extends AbstractController
     private $uploadService;
     private $colaboradorRepository;
     private $getManager;
+    private $helper;
 
-    public function __construct(ManagerRegistry $doctrine, ColaboradorService $colaboradorService, ColaboradorRepository $colaboradorRepository, SerializerInterface $serializer)
+    public function __construct(Helper $helper, ManagerRegistry $doctrine, ColaboradorService $colaboradorService, ColaboradorRepository $colaboradorRepository, SerializerInterface $serializer)
     {
         $this->colaboradorRepository = $colaboradorRepository;        
         $this->serializer = $serializer;
         $this->colaboradorService = $colaboradorService;
         $this->getManager = $doctrine->getManager();
+        $this->helper = $helper;
     }
     
     /**
      * @Route("/colaboradores", name="listar-colaboradores",  methods={"GET"})
      */
-    public function listar(): Response
+    public function listar(Request $request): Response
     {      
-        try {
-            $colaboradores = $this->colaboradorRepository->buscarColaboradores();
-            if(!$colaboradores)
-                return $this->json("Nenhum colaborador encontrada!", 200);   
-            $json = $this->serializer->serialize($colaboradores, 'json',
-                ['groups' => ['mostrar_colaborador']]
-            );
-            return $this->json(json_decode($json), 200);        
-        } catch (\Exception $e) {
-            return $this->json($e->getMessage(), 200); 
-        }
+
+        $buscar = $request->query->get('buscar'); 
+        $colaboradores = $this->helper->resolverBuscar($buscar, $this->colaboradorRepository);        
+        if(!$colaboradores)
+            return $this->json("Nenhum colaborador encontrado!", 200);        
+        
+        $json = $this->serializer->serialize($colaboradores, 'json',
+            ['groups' => ['mostrar_colaborador', 'mostrar_senioridades']]
+        );
+        $resposta = json_decode($json);
+
+        $totalRows = count($this->helper->resolverBuscar($buscar, $this->colaboradorRepository, true));
+        return $this->json(
+            ['colaboradores' => $resposta, 'totalRecords' => $totalRows], 200
+        );
+            
     }
 
     /**

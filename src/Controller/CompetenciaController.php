@@ -96,8 +96,11 @@ class CompetenciaController extends AbstractController
         try {
             if($content = $request->getContent()){
                 $dados = json_decode($content);                
-                $competencia = $this->competenciaService->salvar($dados);
-                return $this->json($competencia->getId(), 200);
+                $competencia = $this->competenciaService->salvar($dados);                
+                $json = $this->serializer->serialize($competencia, 'json',
+                    ['groups' => ['mostrar_competencia', 'mostrar_categorias']]
+                );
+                return $this->json(json_decode($json), 200);                      
             }
             return $this->json(['Ocorreu um erro ao cadastrar a competência!'], 200);       
         } catch (\Exception $e) {
@@ -114,7 +117,11 @@ class CompetenciaController extends AbstractController
             if($content = $request->getContent()){
                 $dados = json_decode($content);
                 $competencia = $this->competenciaService->atualizar($dados);                
-                return $this->json($competencia->getId(), 200);
+                //return $this->json($competencia, 200);
+                $json = $this->serializer->serialize($competencia, 'json',
+                    ['groups' => ['mostrar_competencia', 'mostrar_categorias']]
+                );
+                return $this->json(json_decode($json), 200);  
             } 
             return $this->json("Competência não encontrada!", 200); 
         } catch (\Exception $e) {
@@ -125,13 +132,14 @@ class CompetenciaController extends AbstractController
     /**
      * @Route("/competencias/{id}", name="excluir-competencia", methods={"DELETE"})
     */
-    public function excluir(Request $request, int $id):Response {
+    public function excluir(Request $request, int $id):Response 
+    {
 
-        try {
-            $competencia = $this->competenciaService->excluir($id);                          
-            return $this->json($competencia->getId(), 200);
+        try {            
+            $competencia = $this->competenciaService->excluir($id);                  
+            return $this->json(['codigo' => Response::HTTP_OK, 'message' => $competencia->getId()], 200);  
         } catch (\Exception $e) {
-            return $this->json($e->getMessage(), 200);
+            return $this->json(['codigo' => Response::HTTP_NOT_FOUND, 'message' => $e->getMessage()], 200); 
         }
         
     }

@@ -46,14 +46,27 @@ class Helper
             $objeto = $objeto->orderBy("c.".$buscar["sortField"], $order);
         }        
         if(isset($buscar) && isset($buscar["filters"])){
-            foreach($buscar["filters"] as $key => $filter)                                
+            foreach($buscar["filters"] as $key => $filter){                                                
                 if($filter["value"] != null){
-                    $comparacao = $this->traduzFiltros($filter["matchMode"], $filter["value"]);
-                    $objeto = $objeto->andWhere("c.".$key." ".$comparacao);
+                    $filtro = $filter["value"];
+                    if((array) $filtro === $filtro){                                                                        
+                        $consulta = "";
+                        foreach($filtro as $index => $f){
+                            $consulta .= "c.".$key." = ".$f["id"]." ";
+                            if($index < count($filtro)-1)
+                                $consulta .= "OR ";
+                        }
+                        $objeto = $objeto->andWhere($consulta);
+                    }else{
+                        $comparacao = $this->traduzFiltros($filter["matchMode"], $filter["value"]);
+                        $objeto = $objeto->andWhere("c.".$key." ".$comparacao);
+                    }                    
                 }
+            }
         }
+        $objeto = $objeto->andWhere('c.deleted_at is null');
         $objeto = $objeto->getQuery()->getResult(); 
-
+        
         return $objeto;
                 
     }

@@ -34,10 +34,10 @@ class CompetenciaService
             $this->competencia->setNome($dados->nome);
 
         if(isset($dados->descricao))
-            $this->competencia->setNome($dados->descricao);
+            $this->competencia->setDescricao($dados->descricao);
         
         if(isset($dados->categoria)){
-            $categoria = $this->categoriaRepository->buscarCategoria($dados->categoria);
+            $categoria = $this->categoriaRepository->buscarCategoria($dados->categoria->id);
             if (!$categoria)
                 return $this->competencia;
                
@@ -64,7 +64,7 @@ class CompetenciaService
         if(isset($dados->descricao))
             $competencia->setDescricao($dados->descricao);
 
-        $categoria = $this->categoriaRepository->buscarCategoria($dados->categoria);
+        $categoria = $this->categoriaRepository->buscarCategoria($dados->categoria->id);
         if (!$categoria)
             throw new Exception("Categoria não encontrada para atualização!", 1);  
 

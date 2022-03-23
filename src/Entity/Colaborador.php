@@ -29,27 +29,32 @@ class Colaborador
 
     /**
      * @ORM\Column(type="string", length=45, nullable=true)
+     * @Groups({"mostrar_colaborador", "mostrar_turma"})
      */
     private $sobrenome;
 
     /**
      * @ORM\Column(type="string", length=15)
      * @Assert\NotNull(message="O campo CPF deve ser obrigatório")
+     * @Groups({"mostrar_colaborador", "mostrar_turma"})
      */
     private $cpf;
 
     /**
      * @ORM\Column(type="string", length=45)
+     * @Groups({"mostrar_colaborador", "mostrar_turma"})
      */
     private $email;
 
     /**
      * @ORM\Column(type="date")
+     * @Groups({"mostrar_colaborador", "mostrar_turma"})
      */
     private $data_nascimento;
 
     /**
      * @ORM\Column(type="date")
+     * @Groups({"mostrar_colaborador", "mostrar_turma"})
      */
     private $data_admissao;
 
@@ -67,11 +72,13 @@ class Colaborador
     /**
      * @ORM\ManyToOne(targetEntity=Senioridade::class, inversedBy="colaboradors")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups({"mostrar_colaborador", "mostrar_turma"})
      */
     private $senioridade;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"mostrar_colaborador", "mostrar_turma"})
      */
     private $foto;
 
